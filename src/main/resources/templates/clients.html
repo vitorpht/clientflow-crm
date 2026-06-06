@@ -119,6 +119,19 @@
 		</div>
 
 		<div class="content-card">
+			<div class="p-3 p-md-4 border-bottom">
+				<form th:action="@{/clients}" method="get" class="row g-2 align-items-center">
+					<div class="col-sm">
+						<input type="search" name="search" class="form-control" placeholder="Search by name..."
+							th:value="${search}">
+					</div>
+					<div class="col-sm-auto d-flex gap-2">
+						<button type="submit" class="btn btn-primary btn-primary-custom">Search</button>
+						<a th:href="@{/clients}" class="btn btn-outline-secondary">Clear</a>
+					</div>
+				</form>
+			</div>
+
 			<div th:if="${#lists.isEmpty(clients)}" class="empty-state">
 				<p class="fs-5 mb-0">No clients found</p>
 			</div>
@@ -133,6 +146,7 @@
 							<th scope="col">Phone</th>
 							<th scope="col">Company</th>
 							<th scope="col">Created At</th>
+							<th scope="col">Actions</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -143,6 +157,17 @@
 							<td th:text="${client.phone}">+351 900 000 000</td>
 							<td th:text="${client.company}">Acme Inc.</td>
 							<td th:text="${#temporals.format(client.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2026 12:00</td>
+							<td>
+								<div class="d-flex flex-wrap gap-1">
+									<a th:href="@{/clients/edit/{id}(id=${client.id})}"
+										class="btn btn-sm btn-outline-primary">Edit</a>
+									<button type="button" class="btn btn-sm btn-outline-danger delete-btn"
+										data-bs-toggle="modal" data-bs-target="#deleteModal"
+										th:attr="data-delete-url=@{/clients/delete/{id}(id=${client.id})}, data-client-name=${client.name}">
+										Delete
+									</button>
+								</div>
+							</td>
 						</tr>
 					</tbody>
 				</table>
@@ -150,8 +175,37 @@
 		</div>
 	</main>
 
+	<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					Are you sure you want to delete client <strong id="deleteClientName"></strong>?
+					This action cannot be undone.
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+					<form id="deleteForm" method="post" class="d-inline">
+						<button type="submit" class="btn btn-danger">Delete</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
 		integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
 		crossorigin="anonymous"></script>
+	<script>
+		document.querySelectorAll('.delete-btn').forEach(function (button) {
+			button.addEventListener('click', function () {
+				document.getElementById('deleteForm').action = button.dataset.deleteUrl;
+				document.getElementById('deleteClientName').textContent = button.dataset.clientName;
+			});
+		});
+	</script>
 </body>
 </html>
